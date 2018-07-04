@@ -14,6 +14,15 @@ Square root of =a=
 If we define =f(x) = a/x= then the solution to =f(x) = x= provides us
 the answer.
 
+**Update**
+Or perhaps not. It provides us an alternating point values of x. So we
+use damping, as follows:
+
+=x + f(x) = x + x=, or =x = (x + f(x)) / 2=
+
+And find the fixed point of the dampened function, =x = d(f, x)=;
+where =d(f, x) = (x + f(x)) / 2=
+
 * How to find the solution
 
 This problem has been sufficiently spoken about and much
