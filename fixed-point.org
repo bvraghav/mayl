@@ -1,0 +1,69 @@
+#+TITLE: Finding the fixed point
+#+PROPERTY: header-args :session
+
+* What is a fixed point problem?
+
+Any problem where the we can model a function f, such that the
+solution to: =f(x) = x= is the required values (or parameters, or
+weights) is called a fixed point problem
+
+* Example
+
+Square root of =a=
+
+If we define =f(x) = a/x= then the solution to =f(x) = x= provides us
+the answer.
+
+* How to find the solution
+
+This problem has been sufficiently spoken about and much
+illustrated. Some references may be [[https://www.google.com/search?q=fixed+point+iteration+method][picked up from here]].
+
+Simply put, we plug in 
+=x_{i+1} = f(x_i)=
+
+And when necessary, we dampen the divergence using,
+=x_{i+1} = (1 + f(x_i))/2=
+
+We terminate, if, either a termination predicate has a signal, or if
+we cross max iterations.
+
+* Implementation
+
+#+BEGIN_SRC lisp
+  (defun fixed-point (fn term-fn-p
+                      &key
+                        ((:start start) 0)
+                        ((:curr-iter curr-iter) 0)
+                        ((:dampenp dampenp) t)
+                        ((:max-iter max-iter) 100))
+    (let* ((fp-fn (if dampenp
+                      (lambda (x)
+                        (* 0.5 (1+ (apply fn (list x)))))
+                      fn))
+           (x (apply fp-fn (list start)))
+           (termp (apply term-fn-p (list x start))))
+      (print (list x curr-iter))
+      (if (or termp
+              (>= curr-iter max-iter))
+          (list x curr-iter)
+          (fixed-point fn term-fn-p 
+                       :start x
+                       :curr-iter (1+ curr-iter)
+                       :max-iter max-iter
+                       :dampenp dampenp))))
+#+END_SRC
+
+#+RESULTS:
+: FIXED-POINT
+
+#+BEGIN_SRC lisp
+  (fixed-point (lambda (x) (/ 10 x))
+               (lambda (x y)
+                 (< (abs (- x y))
+                    0.001))
+               :start 1.05)
+#+END_SRC
+
+#+RESULTS:
+| 2.4995558 | 37 |
