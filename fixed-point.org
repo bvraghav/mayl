@@ -1,5 +1,5 @@
 #+TITLE: Finding the fixed point
-#+PROPERTY: header-args :session
+#+PROPERTY: header-args :results output replace
 
 * What is a fixed point problem?
 
@@ -35,13 +35,8 @@ we cross max iterations.
                       &key
                         ((:start start) 0)
                         ((:curr-iter curr-iter) 0)
-                        ((:dampenp dampenp) t)
                         ((:max-iter max-iter) 100))
-    (let* ((fp-fn (if dampenp
-                      (lambda (x)
-                        (* 0.5 (1+ (apply fn (list x)))))
-                      fn))
-           (x (apply fp-fn (list start)))
+    (let* ((x (apply fn (list start)))
            (termp (apply term-fn-p (list x start))))
       (print (list x curr-iter))
       (if (or termp
@@ -50,12 +45,10 @@ we cross max iterations.
           (fixed-point fn term-fn-p 
                        :start x
                        :curr-iter (1+ curr-iter)
-                       :max-iter max-iter
-                       :dampenp dampenp))))
+                       :max-iter max-iter))))
 #+END_SRC
 
 #+RESULTS:
-: FIXED-POINT
 
 #+BEGIN_SRC lisp
   (fixed-point (lambda (x) (/ 10 x))
@@ -67,3 +60,58 @@ we cross max iterations.
 
 #+RESULTS:
 | 2.4995558 | 37 |
+
+* Application(s)
+
+** Square Root finding
+Square root function is a diverging fixed point. So damping the
+iteration converges. It is implementd using a more general nth root
+fixed point function.
+
+#+BEGIN_SRC lisp
+  (defun fixed-fn-nth-root (n a)
+    (lambda (x)
+      (/ (expt a (1- n)) x)))
+
+  (defun dampened-nth-root (n a)
+    (lambda (x)
+      (* 0.5
+         (+ x
+            (apply (fixed-fn-nth-root n a)
+                   (list x))))))
+
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC lisp
+  (defun square-root (a &optional (precision 0.00001))
+    (fixed-point (dampened-nth-root 2 a)
+                 (lambda (x y)
+                   (< (abs (- x y))
+                      precision))
+                 :start (/ a 2)))
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC lisp
+  (print (square-root 559 0.000000001))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+(140.75 0) 
+(72.360794 1) 
+(40.042984 2) 
+(27.001492 3) 
+(23.852026 4) 
+(23.644096 5) 
+(23.64318 6) 
+(23.64318 7) 
+(23.64318 7) 
+#+end_example
+
+
+
