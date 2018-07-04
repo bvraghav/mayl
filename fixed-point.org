@@ -14,7 +14,8 @@ Square root of =a=
 If we define =f(x) = a/x= then the solution to =f(x) = x= provides us
 the answer.
 
-**Update**
+*Update*
+
 Or perhaps not. It provides us an alternating point values of x. So we
 use damping, as follows:
 
