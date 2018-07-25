@@ -45,17 +45,20 @@ we cross max iterations.
                       &key
                         ((:start start) 0)
                         ((:curr-iter curr-iter) 0)
-                        ((:max-iter max-iter) 100))
+                        ((:max-iter max-iter) 100)
+                        ((:debugp debugp) nil))
     (let* ((x (apply fn (list start)))
            (termp (apply term-fn-p (list x start))))
-      (print (list x curr-iter))
+      (when debugp
+        (print (list x curr-iter)))
       (if (or termp
               (>= curr-iter max-iter))
           (list x curr-iter)
           (fixed-point fn term-fn-p 
                        :start x
                        :curr-iter (1+ curr-iter)
-                       :max-iter max-iter))))
+                       :max-iter max-iter
+                       :debugp debugp))))
 #+END_SRC
 
 #+RESULTS:
@@ -69,7 +72,6 @@ we cross max iterations.
 #+END_SRC
 
 #+RESULTS:
-| 2.4995558 | 37 |
 
 * Application(s)
 
@@ -95,18 +97,20 @@ fixed point function.
 #+RESULTS:
 
 #+BEGIN_SRC lisp
-  (defun square-root (a &optional (precision 0.00001))
+  (defun square-root (a &optional (precision 0.00001) 
+                          (debugp nil))
     (fixed-point (dampened-nth-root 2 a)
                  (lambda (x y)
                    (< (abs (- x y))
                       precision))
-                 :start (/ a 2)))
+                 :start (/ a 2)
+                 :debugp debugp))
 #+END_SRC
 
 #+RESULTS:
 
 #+BEGIN_SRC lisp :exports both
-  (print (square-root 559 0.000000001))
+  (print (square-root 559 0.000000001 t))
 #+END_SRC
 
 #+RESULTS:
